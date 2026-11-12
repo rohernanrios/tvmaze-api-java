@@ -13,14 +13,16 @@ import java.util.List;
 @RestController
 class ShowController {
     private final TvMazeClient tvMaze;
+    private final ShowService shows;
 
-    ShowController(TvMazeClient tvMaze) {
+    ShowController(TvMazeClient tvMaze, ShowService shows) {
         this.tvMaze = tvMaze;
+        this.shows = shows;
     }
 
     @GetMapping("/show/{show_id}")
     JsonNode show(@PathVariable("show_id") @Positive long id) {
-        return tvMaze.show(id);
+        return shows.show(id);
     }
 
     @GetMapping("/search")
