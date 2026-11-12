@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,7 +21,6 @@ import static java.util.stream.Collectors.toList;
 class ShowController {
     private final TvMazeClient tvMaze;
     private final ShowService shows;
-
     private final ShowCommentRepository comments;
     private final ObjectMapper mapper;
 
