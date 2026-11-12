@@ -1,6 +1,8 @@
 package mx.tvmaze;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,16 +23,22 @@ class ShowController {
     private final ShowService shows;
 
     private final ShowCommentRepository comments;
+    private final ObjectMapper mapper;
 
-    ShowController(TvMazeClient tvMaze, ShowService shows, ShowCommentRepository comments) {
+    ShowController(TvMazeClient tvMaze, ShowService shows, ShowCommentRepository comments, ObjectMapper mapper) {
         this.tvMaze = tvMaze;
         this.shows = shows;
         this.comments = comments;
+        this.mapper = mapper;
     }
 
     @GetMapping("/show/{show_id}")
     JsonNode show(@PathVariable("show_id") @Positive long id) {
-        return shows.show(id);
+        ObjectNode show = (ObjectNode) shows.show(id).deepCopy();
+        List<CommentView> savedComments = comments.findByShowIdOrderByIdAsc(id).stream()
+                .map(CommentView::from).toList();
+        show.set("comments", mapper.valueToTree(savedComments));
+        return show;
     }
 
     @GetMapping("/search")
