@@ -30,6 +30,10 @@ class TvMazeClient {
         return Arrays.stream(results).map(result -> result.get("show")).toList();
     }
 
+    JsonNode show(long id) {
+        return get("/shows/{id}", JsonNode.class, id);
+    }
+
     private <T> T get(String path, Class<T> type, Object parameter) {
         try {
             T body = client.get().uri(path, parameter).retrieve().body(type);

@@ -1,6 +1,9 @@
 package mx.tvmaze;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,6 +16,11 @@ class ShowController {
 
     ShowController(TvMazeClient tvMaze) {
         this.tvMaze = tvMaze;
+    }
+
+    @GetMapping("/show/{show_id}")
+    JsonNode show(@PathVariable("show_id") @Positive long id) {
+        return tvMaze.show(id);
     }
 
     @GetMapping("/search")
