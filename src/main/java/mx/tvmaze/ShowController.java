@@ -9,15 +9,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
 
 @RestController
 class ShowController {
     private final TvMazeClient tvMaze;
     private final ShowService shows;
 
-    ShowController(TvMazeClient tvMaze, ShowService shows) {
+    private final ShowCommentRepository comments;
+
+    ShowController(TvMazeClient tvMaze, ShowService shows, ShowCommentRepository comments) {
         this.tvMaze = tvMaze;
         this.shows = shows;
+        this.comments = comments;
     }
 
     @GetMapping("/show/{show_id}")
@@ -27,6 +35,15 @@ class ShowController {
 
     @GetMapping("/search")
     List<ShowSummary> search(@RequestParam("search_query") @NotBlank String query) {
-        return tvMaze.search(query.strip()).stream().map(ShowSummary::from).toList();
+        List<JsonNode> results = tvMaze.search(query.strip());
+        if (results.isEmpty()) {
+            return List.of();
+        }
+        List<Long> ids = results.stream().map(show -> show.path("id").asLong()).distinct().toList();
+        Map<Long, List<CommentView>> byShow = comments.findByShowIdInOrderByIdAsc(ids).stream()
+                .collect(groupingBy(ShowComment::showId, mapping(CommentView::from, toList())));
+        return results.stream()
+                .map(show -> ShowSummary.from(show, byShow.getOrDefault(show.path("id").asLong(), List.of())))
+                .toList();
     }
 }
